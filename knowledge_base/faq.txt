@@ -1,0 +1,25 @@
+FREQUENTLY ASKED QUESTIONS - ABC Technologies
+
+Q: How do I reset my password?
+A: Go to the login page and click "Forgot Password". Enter your registered email address and follow the link sent to your inbox to set a new password.
+
+Q: How do I update my profile information?
+A: Navigate to Account Settings > Profile, update your details, and click Save Changes.
+
+Q: How do I activate my account?
+A: New accounts are activated automatically after email verification. Click the activation link sent to your registered email.
+
+Q: How do I deactivate my account temporarily?
+A: Go to Account Settings > Account Status and select "Deactivate Account". You can reactivate anytime by logging back in within 90 days.
+
+Q: Can I change my registered email address?
+A: Yes, go to Account Settings > Profile > Email, enter the new email, and verify it via the confirmation link.
+
+Q: What happens to my data if I deactivate my account?
+A: Your data is securely retained for 90 days. After that period, it may be permanently deleted in accordance with our data retention policy.
+
+Q: How do I change my subscription plan?
+A: Go to Billing > Subscription Plans and select the new plan. Changes take effect at the start of the next billing cycle.
+
+Q: Who do I contact for unresolved issues?
+A: If your issue is not resolved by support, you may request escalation to management through the support ticket system.

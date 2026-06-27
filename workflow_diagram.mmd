@@ -1,0 +1,46 @@
+%% Mermaid source for the LangGraph workflow.
+%% You can also render this at https://mermaid.live if you want an
+%% interactive/editable version of the diagram (workflow_diagram.png is the
+%% offline-rendered deliverable already included in this submission).
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([START]):::first
+	intent_classification(Intent Classification<br/>Task 3)
+	memory_recall(Memory Recall<br/>SQLite)
+	sales_agent(Sales Agent + RAG)
+	technical_agent(Technical Agent + RAG)
+	billing_agent(Billing Agent + RAG)
+	account_agent(Account Agent + RAG)
+	human_approval(Human-in-the-Loop Approval<br/>Task 8)
+	supervisor(Supervisor Agent<br/>Task 9)
+	save_memory(Save to Memory<br/>memory.db)
+	__end__([END]):::last
+
+	__start__ --> intent_classification;
+	intent_classification -. Sales .-> sales_agent;
+	intent_classification -. Technical .-> technical_agent;
+	intent_classification -. Billing .-> billing_agent;
+	intent_classification -. Account .-> account_agent;
+	intent_classification -. Memory .-> memory_recall;
+
+	sales_agent -. high-risk .-> human_approval;
+	sales_agent -. normal .-> supervisor;
+	technical_agent -. high-risk .-> human_approval;
+	technical_agent -. normal .-> supervisor;
+	billing_agent -. high-risk .-> human_approval;
+	billing_agent -. normal .-> supervisor;
+	account_agent -. high-risk .-> human_approval;
+	account_agent -. normal .-> supervisor;
+
+	human_approval --> supervisor;
+	supervisor --> save_memory;
+	memory_recall --> save_memory;
+	save_memory --> __end__;
+
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc

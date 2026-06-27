@@ -1,0 +1,30 @@
+TECHNICAL MANUAL - ABC Technologies
+
+APPLICATION CRASH ISSUES
+If the application crashes while uploading a file, check the following:
+1. Ensure the file size does not exceed the 200MB upload limit.
+2. Confirm the file format is supported (CSV, XLSX, PDF, DOCX, PNG, JPG).
+3. Clear the browser cache and cookies, then retry the upload.
+4. Disable browser extensions that may interfere with file uploads.
+5. If the issue persists, try uploading from a different browser or device.
+6. Check your internet connection stability during large file uploads.
+
+LOGIN PROBLEMS
+Common causes of login failure include incorrect credentials, expired sessions, or account lockout after 5 failed attempts.
+If locked out, customers must wait 30 minutes or reset their password via the "Forgot Password" link.
+Two-factor authentication codes expire after 5 minutes; request a new code if expired.
+
+INSTALLATION ISSUES
+For desktop application installation failures:
+1. Verify the operating system meets minimum requirements (Windows 10+/macOS 11+).
+2. Run the installer as an administrator.
+3. Temporarily disable antivirus software during installation.
+4. Ensure at least 2GB of free disk space is available.
+
+CONFIGURATION ISSUES
+Configuration errors are often caused by incorrect API keys, outdated integration settings, or missing permissions.
+Always verify integration credentials in Settings > Integrations after any password change.
+
+GENERAL TROUBLESHOOTING
+Restarting the application and clearing local cache resolves most minor glitches.
+Persistent technical issues should be escalated with a screenshot and error log for faster resolution.
