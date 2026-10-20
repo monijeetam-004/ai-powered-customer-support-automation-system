@@ -49,12 +49,16 @@ def llm_complete(system_prompt: str, user_prompt: str, fallback: str) -> str:
 # ---------------------------------------------------------------------------
 
 INTENT_KEYWORDS = {
+    # Memory patterns must refer to a *past support interaction*. Broad
+    # patterns such as a bare "history" or "what was my" used to send
+    # "Can I see my billing history?" or "What was my plan price?" to memory
+    # recall instead of the right department.
     "Memory": [
-        r"previous (issue|problem|request|query)",
-        r"what (did|was) (i|my)",
-        r"earlier (issue|conversation|problem)",
-        r"last time",
-        r"history",
+        r"\bprevious (support )?(issue|problem|request|query|ticket|conversation)",
+        r"\b(earlier|last) (support )?(issue|problem|request|query|ticket|conversation)",
+        r"\b(support|conversation|ticket|chat) history\b",
+        r"\bwhat (did|have) i (ask|report|raise|tell)",
+        r"\blast time i (asked|contacted|reached out|wrote|called)",
     ],
     "Sales": [
         r"pricing", r"price", r"plan", r"subscription plan", r"cost", r"upgrade",

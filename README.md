@@ -10,7 +10,7 @@ before a final response is sent.
 ## 1. Project Structure
 
 ```
-support_system/
+ai-powered-customer-support-automation-system/
 ├── state.py              # Task 2 - SupportState schema
 ├── memory.py             # Task 7 - SQLite conversation memory (memory.db)
 ├── rag.py                # Task 6 - TF-IDF based RAG retrieval pipeline
@@ -18,7 +18,6 @@ support_system/
 ├── nodes.py              # Tasks 3,5,6,7,8,9 - all graph node implementations
 ├── graph.py              # Tasks 1,4 - LangGraph workflow + conditional routing
 ├── main.py               # Task 10 - demo runner for the 5 sample queries
-├── generate_diagram.py   # builds workflow_diagram.png
 ├── workflow_diagram.png  # rendered workflow diagram (deliverable)
 ├── workflow_diagram.mmd  # mermaid source for the diagram
 ├── knowledge_base/
@@ -26,11 +25,16 @@ support_system/
 │   ├── pricing_guide.txt
 │   ├── technical_manual.txt
 │   └── faq.txt
-├── demo_output.log        # captured run of all 5 demo queries
-├── memory.db               # SQLite memory created on first run
-├── checkpoints.db          # LangGraph checkpoint DB (powers interrupt/resume)
+├── Output screenshots/    # screenshots + PDF of the demo run
+├── tests/                 # pytest regression tests (run offline)
+├── .github/workflows/     # CI: runs the tests on every push / pull request
 ├── requirements.txt
+├── .gitignore
 └── DOCUMENTATION_REPORT.md
+
+Created at runtime (not tracked in Git, see .gitignore):
+├── memory.db               # SQLite conversation memory, created on first run
+└── checkpoints.db          # LangGraph checkpoint DB (powers interrupt/resume)
 ```
 
 ## 2. Setup
@@ -72,17 +76,34 @@ a supervisor dashboard/UI instead of being auto-simulated.
 
 ## 4. Regenerate the Workflow Diagram
 
+`workflow_diagram.png` is rendered from the Mermaid source `workflow_diagram.mmd`.
+To regenerate it, paste the `.mmd` file into https://mermaid.live and export a
+PNG, or use the Mermaid CLI:
+
 ```bash
-python3 generate_diagram.py
+npx -y @mermaid-js/mermaid-cli@11.4.2 -i workflow_diagram.mmd -o workflow_diagram.png
 ```
 
-## 5. Inspecting Stored Memory
+## 5. Run the Tests
+
+The tests run fully offline (no API key needed) and use temporary databases,
+so they never touch your own `memory.db` or `checkpoints.db`.
+
+```bash
+pip install -r requirements.txt pytest
+python -m pytest tests -q
+```
+
+The same tests run automatically in GitHub Actions on every push and pull
+request (`.github/workflows/tests.yml`).
+
+## 6. Inspecting Stored Memory
 
 ```bash
 python3 -c "import memory; [print(r) for r in memory.get_history('CUST-1001')]"
 ```
 
-## 6. Notes on Design Choices
+## 7. Notes on Design Choices
 
 - **RAG**: Uses TF-IDF + cosine similarity (scikit-learn) over the 4 knowledge
   base text documents instead of an external embeddings API, so the whole

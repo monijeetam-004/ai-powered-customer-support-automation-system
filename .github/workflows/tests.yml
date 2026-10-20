@@ -1,0 +1,40 @@
+name: tests
+
+# Runs the offline test suite and the demo on every push to main and on
+# every pull request. No secrets are used: the project runs fully offline
+# with its rule-based fallback when ANTHROPIC_API_KEY is not set.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Least privilege: the job only needs to read the repository.
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pytest
+
+      - name: Run tests
+        run: python -m pytest tests -v
+
+      - name: Run the demo end-to-end (offline smoke test)
+        run: python main.py
