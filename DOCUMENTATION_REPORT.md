@@ -68,12 +68,19 @@ by `llm.py::detect_high_risk()`. When detected, the graph routes to
 and surface the request for supervisor review. A `SqliteSaver` checkpointer
 (`checkpoints.db`) persists the paused state so the graph can be resumed
 later (even after a process restart) with `Command(resume={"decision": "approve"|"reject", "comment": ...})`.
+The decision is matched case-insensitively (`"approve"`, `"Approved"`, `"REJECT"`
+and a bare string such as `"approve"` all work). A missing or unrecognised
+decision is never treated as an approval: the request is marked
+`invalid_decision` and the customer is told it is still under review.
 
 ### 10. Task 9 — Supervisor Agent (`nodes.py::supervisor_node`)
 Runs after every department agent (and after human approval, when
 triggered). If the human approver rejected the request, the supervisor
 rewrites the final response into a polite decline; otherwise it validates
 and lightly polishes the draft response before it is sent to the customer.
+For approved high-risk requests it appends a confirmation that the request
+was approved, so the reply (and the copy saved to memory) reflects the real
+decision.
 
 ### 11. Task 10 — Demonstration (`main.py`, `demo_output.log`)
 `main.py` runs the five sample queries end-to-end and prints the full trace

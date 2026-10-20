@@ -107,9 +107,13 @@ def _run_agent(state: SupportState, department_key: str, agent_label: str) -> Su
 
     context_text = "\n".join(f"- {c}" for c in context_chunks) if context_chunks else "(no matching documents found)"
 
+    # The approval status line ("pending" / "approved" / ...) is NOT baked into
+    # the draft any more. The draft is written before a supervisor decides, so
+    # a "pending" sentence here used to survive into the final reply even after
+    # approval. supervisor_node now adds the status line that matches the
+    # actual decision.
     fallback_draft = (
-        f"Thank you for contacting {agent_label}. Based on our records:\n{context_text}\n\n"
-        f"{'This request has been flagged for supervisor approval before we can proceed.' if is_high_risk else ''}"
+        f"Thank you for contacting {agent_label}. Based on our records:\n{context_text}"
     ).strip()
 
     draft = llm_complete(
@@ -154,6 +158,38 @@ def account_agent_node(state: SupportState) -> SupportState:
 # ---------------------------------------------------------------------------
 # Task 8: Human-in-the-loop approval node
 # ---------------------------------------------------------------------------
+APPROVE_WORDS = {"approve", "approved"}
+REJECT_WORDS = {"reject", "rejected"}
+
+
+def normalize_decision(raw) -> tuple:
+    """Turn whatever the supervisor sent back into (approval_status, comment).
+
+    Accepted inputs:
+      - {"decision": "approve" | "reject", "comment": "..."}  (case-insensitive,
+        surrounding spaces ignored, "approved"/"rejected" also accepted)
+      - a bare string such as "approve" or "REJECT"
+
+    Anything else (missing key, empty, None, numbers, "maybe", ...) returns
+    "invalid_decision". It is never treated as an approval, and the customer
+    is not told the request was declined either.
+    """
+    comment = ""
+    if isinstance(raw, dict):
+        value = raw.get("decision")
+        comment = raw.get("comment") or ""
+        comment = comment.strip() if isinstance(comment, str) else str(comment)
+    else:
+        value = raw
+
+    word = value.strip().lower() if isinstance(value, str) else ""
+    if word in APPROVE_WORDS:
+        return "approved", comment
+    if word in REJECT_WORDS:
+        return "rejected", comment
+    return "invalid_decision", comment
+
+
 def human_approval_node(state: SupportState) -> SupportState:
     """
     Pauses the graph using LangGraph's interrupt() when a request is
@@ -170,23 +206,32 @@ def human_approval_node(state: SupportState) -> SupportState:
         "department": state["department"],
         "risk_reason": state.get("risk_reason"),
         "draft_response": state.get("draft_response"),
-        "instructions": "Reply with {'decision': 'approve'|'reject', 'comment': str}",
+        "instructions": (
+            "Reply with {'decision': 'approve'|'reject', 'comment': str} "
+            "(case-insensitive). Any other value leaves the request under review."
+        ),
     }
 
-    decision = interrupt(payload)  # graph execution pauses here until resumed
+    raw_decision = interrupt(payload)  # graph execution pauses here until resumed
 
-    approval_status = decision.get("decision", "approved")
-    comment = decision.get("comment", "")
+    approval_status, comment = normalize_decision(raw_decision)
+
+    if approval_status == "invalid_decision":
+        log_line = (
+            f"[Human Approval] Unrecognised supervisor decision {raw_decision!r}; "
+            "request left under review (not approved, not declined)."
+        )
+    else:
+        log_line = (
+            f"[Human Approval] Supervisor decision: {approval_status.upper()}"
+            + (f" — comment: {comment}" if comment else "")
+        )
 
     return {
         **state,
-        "approval_status": "approved" if approval_status == "approve" else "rejected",
+        "approval_status": approval_status,
         "approver_comment": comment,
-        "trace": _log(
-            state,
-            f"[Human Approval] Supervisor decision: {approval_status.upper()}"
-            + (f" — comment: {comment}" if comment else ""),
-        ),
+        "trace": _log(state, log_line),
     }
 
 
@@ -205,6 +250,12 @@ def supervisor_node(state: SupportState) -> SupportState:
             + " Please contact support for further assistance."
         )
         notes = "Supervisor rejected the request; replaced draft with a polite decline."
+    elif approval_status == "invalid_decision":
+        final = (
+            f"Thank you for your patience. Your request regarding \"{state['query']}\" "
+            "is still under review by a supervisor, and we will follow up with a decision shortly."
+        )
+        notes = "Supervisor decision was missing or unrecognised; request kept under review."
     else:
         notes_parts = []
         final = draft
@@ -222,6 +273,10 @@ def supervisor_node(state: SupportState) -> SupportState:
         user_prompt=final,
         fallback=final,
     )
+
+    # Added after polishing so the status line always matches the real decision.
+    if approval_status == "approved":
+        final = f"{final}\n\nYour request has been approved by a supervisor and is now being processed."
 
     return {
         **state,
