@@ -1,0 +1,17 @@
+# Runtime SQLite databases. They are created automatically on first run
+# (memory.init_db() and the LangGraph SqliteSaver), so they are not tracked.
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Local secrets
+.env
+.env.*

@@ -75,12 +75,12 @@ triggered). If the human approver rejected the request, the supervisor
 rewrites the final response into a polite decline; otherwise it validates
 and lightly polishes the draft response before it is sent to the customer.
 
-### 11. Task 10 — Demonstration (`main.py`, `demo_output.log`)
+### 11. Task 10 — Demonstration (`main.py`)
 `main.py` runs the five sample queries end-to-end and prints the full trace
 and final response for each. Query 4 (refund) demonstrates the
 interrupt → simulated supervisor decision → resume flow. Query 5
 demonstrates memory recall pulling the prior billing interaction from
-`memory.db`. See `demo_output.log` for a captured run.
+`memory.db`. Screenshots of a captured run are in `Output screenshots/`.
 
 ### 12. Mapping to Submission Checklist
 | Deliverable | File |
@@ -88,6 +88,6 @@ demonstrates memory recall pulling the prior billing interaction from
 | Source Code | all `.py` files in this folder |
 | README.md | `README.md` |
 | Workflow Diagram | `workflow_diagram.png`, `workflow_diagram.mmd` |
-| Screenshots / Execution Evidence | `demo_output.log` (text capture of full run) |
+| Screenshots / Execution Evidence | `Output screenshots/` (screenshots and PDF of the full run) |
 | SQLite Memory File/Schema | `memory.db` (generated on run) + schema in `memory.py` |
-| Task Output Evidence | `demo_output.log` shows agent routing, RAG retrieval, human-in-the-loop approval, memory storage & recall, and final response generation for each of the 5 queries |
+| Task Output Evidence | `Output screenshots/` shows agent routing, RAG retrieval, human-in-the-loop approval, memory storage & recall, and final response generation for each of the 5 queries |
