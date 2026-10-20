@@ -39,6 +39,7 @@ class SupportState(TypedDict, total=False):
     # --- Human-in-the-loop ---
     requires_approval: bool
     approval_status: str       # "not_required" | "pending" | "approved" | "rejected"
+                               # | "invalid_decision" (unclear answer -> kept under review)
     approver_comment: Optional[str]
 
     # --- Trace (for screenshots / demo) ---
